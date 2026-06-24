@@ -8,6 +8,12 @@ const dotenv = require('dotenv');
 // 2. Load environment variables (we will set this up on Day 6)
 dotenv.config();
 
+// Import Database Connection
+const connectDB = require('./config/db');
+
+// Connect to MongoDB
+connectDB();
+
 // 3. Initialize the Express application
 const app = express();
 
