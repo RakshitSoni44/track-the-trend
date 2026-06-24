@@ -56,15 +56,17 @@ def upload_to_mongodb(df):
         client.close()
         print("Database connection closed.")
 
-if __name__ == "__main__":
-    # Run the pipeline sequentially!
-    print("--- Starting Pipeline ---")
+# ==== NO NEED OF BELOW PART AS IT WILL BE HANDLED IN ETL FILE ====
+
+# # if __name__ == "__main__":
+#     # Run the pipeline sequentially!
+#     print("--- Starting Pipeline ---")
     
-    # 1. Scrape & Analyze (from Day 2)
-    trends_df = analyze_trends()
+#     # 1. Scrape & Analyze (from Day 2)
+#     trends_df = analyze_trends()
     
-    # 2. Upload to MongoDB (Day 3)
-    if not trends_df.empty:
-        upload_to_mongodb(trends_df)
-    else:
-        print("No data extracted, skipping database upload.")
+#     # 2. Upload to MongoDB (Day 3)
+#     if not trends_df.empty:
+#         upload_to_mongodb(trends_df)
+#     else:
+#         print("No data extracted, skipping database upload.")
