@@ -4,6 +4,7 @@
 // 1. Import dependencies
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors');
 
 // 2. Load environment variables (we will set this up on Day 6)
 dotenv.config();
@@ -18,8 +19,20 @@ connectDB();
 const app = express();
 
 // 4. Middleware
+// --- DAY 8: ADD CORS MIDDLEWARE ---
+// We configure CORS to accept requests from our upcoming Vite React frontend
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite's default port
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
+
 // This built-in middleware allows our server to read JSON data from incoming requests.
 app.use(express.json());
+
+// --- DAY 7: IMPORT ROUTES ---
+// We bring in the router file we created today
+const trendRoutes = require('./routes/trends');
 
 // 5. Define a Basic Route (Endpoint)
 // An HTTP GET request to the root URL ('/') will trigger this function.
@@ -36,6 +49,10 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// --- DAY 7: USE ROUTES ---
+// Any request that goes to '/api/trends' will be handed off to the trendRoutes file!
+app.use('/api/trends', trendRoutes);
 
 // 6. Start the Server
 // We define a port. It will use the environment variable PORT if it exists, otherwise defaults to 5000.
