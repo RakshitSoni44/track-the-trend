@@ -22,7 +22,10 @@ const app = express();
 // --- DAY 8: ADD CORS MIDDLEWARE ---
 // We configure CORS to accept requests from our upcoming Vite React frontend
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite's default port
+  origin: [
+    'http://localhost:5173',  // Vite's default port
+    'https://track-the-trend.vercel.app' //Our deployed frontend link
+  ],
   methods: ['GET', 'POST'],
   credentials: true
 }));
