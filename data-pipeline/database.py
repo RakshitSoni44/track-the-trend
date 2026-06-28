@@ -3,7 +3,7 @@
 
 import os
 from dotenv import load_dotenv
-from pymongo import MongoClient
+from pymongo import MongoClient, UpdateOne
 import pandas as pd
 
 # We import the function from Day 2 to generate fresh data
@@ -41,13 +41,27 @@ def upload_to_mongodb(df):
         # 'records' orientation turns each row into a dictionary.
         records = df.to_dict(orient="records")
 
-        # 5. Insert Data
-        print(f"Preparing to insert {len(records)} records...")
+        # 5. Insert Data (UPDATED TO PREVENT DUPLICATES)
+        print(f"Preparing to process {len(records)} records...")
         
-        # We use insert_many to push the whole list at once (efficient)
-        result = collection.insert_many(records)
+        # Create a list of "Upsert" operations
+        operations = []
+        for record in records:
+            # Safely grab the text (handling your previous 'original_text' modification)
+            text_key = "original_text" if "original_text" in record else "text"
+            
+            operations.append(
+                UpdateOne(
+                    {text_key: record[text_key]}, # The unique identifier to look for
+                    {"$set": record},             # The data to update/insert
+                    upsert=True                   # Insert it if it doesn't exist!
+                )
+            )
+            
+        # Execute all operations at once (highly efficient)
+        result = collection.bulk_write(operations)
         
-        print(f"Success! Inserted {len(result.inserted_ids)} records into MongoDB.")
+        print(f"Success! Inserted {result.upserted_count} new trends and updated {result.modified_count} existing ones.")
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -56,17 +70,15 @@ def upload_to_mongodb(df):
         client.close()
         print("Database connection closed.")
 
-# ==== NO NEED OF BELOW PART AS IT WILL BE HANDLED IN ETL FILE ====
-
-# # if __name__ == "__main__":
-#     # Run the pipeline sequentially!
-#     print("--- Starting Pipeline ---")
+if __name__ == "__main__":
+    # Run the pipeline sequentially!
+    print("--- Starting Pipeline ---")
     
-#     # 1. Scrape & Analyze (from Day 2)
-#     trends_df = analyze_trends()
+    # 1. Scrape & Analyze (from Day 2)
+    trends_df = analyze_trends()
     
-#     # 2. Upload to MongoDB (Day 3)
-#     if not trends_df.empty:
-#         upload_to_mongodb(trends_df)
-#     else:
-#         print("No data extracted, skipping database upload.")
+    # 2. Upload to MongoDB (Day 3)
+    if not trends_df.empty:
+        upload_to_mongodb(trends_df)
+    else:
+        print("No data extracted, skipping database upload.")
