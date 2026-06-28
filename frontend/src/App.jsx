@@ -22,7 +22,7 @@ function App() {
     if (manualRefresh) setIsRefreshing(true);
     
     try {
-      const response = await fetch('http://localhost:5000/api/trends');
+      const response = await fetch('https://track-the-trend.onrender.com/api/trends');
       if (!response.ok) {
         throw new Error('Failed to fetch data from the server');
       }
