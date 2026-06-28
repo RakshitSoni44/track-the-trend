@@ -1,0 +1,35 @@
+name: Daily Scrape Pipeline
+
+on:
+  schedule:
+    # Runs at 18:30 UTC, which is exactly 00:00 (Midnight) Indian Standard Time (IST) every day
+    - cron: '30 18 * * *' 
+  workflow_dispatch: # This magical line adds a "Run workflow" button so you can trigger it manually!
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest # GitHub gives us a free Linux virtual machine
+    
+    steps:
+      # 1. Grab our code from the repository
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+
+      # 2. Install Python on the virtual machine
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # 3. Install all the libraries our script needs (including Playwright's browsers)
+      - name: Install dependencies
+        run: |
+          pip install playwright pandas vaderSentiment pymongo python-dotenv
+          playwright install-deps
+          playwright install chromium
+
+      # 4. Run the master orchestrator script!
+      - name: Execute ETL Pipeline
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }} # Pulls the secret we saved in Step A
+        run: python data-pipeline/pipeline.py
